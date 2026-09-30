@@ -108,6 +108,28 @@ a permanent layer behind, so reproducibility now comes from the digest-pinned
 `packages` stage being the only source the package transaction can see rather
 than from the repository contents living in the image.
 
+## Printing and scanning gaps
+
+CUPS and its driverless IPP support do not supply the full printing/scanning
+stack (#390). `bluez-cups` belongs in `[parity]`: the pinned factory publishes
+it as a separate Bluetooth printer backend, and installing CUPS alone does
+not request it. It requires the matching `bluez` build, so validate the full
+transaction with `just check-repos` when changing this entry.
+
+The factory pin `0f04cff2dd0b085604ff3cd79d538ab14b97cbe356980f7d365a35dfc70c857b`
+has no packages for the remaining #390 families: `system-config-printer`,
+`hplip`, `sane-backends`, `sane-airscan`/`libsane-airscan`, `libsane-hpaio`,
+`ipp-usb`, `gutenprint`, `foo2zjs`, `c2esp`, `dymo-cups-drivers`,
+`printer-driver-brlaser`, `ptouch-driver`, `splix`, `braille-printer-app`,
+`paps`, and `mpage`. These need factory publication before manifest additions;
+do not enable Fedora runtime repositories to fill the gap. Prioritize the
+printer configuration tool, HP support and AirScan as requested in #390,
+then resolve the published RPM names and their dependencies against the
+pinned inputs. A metadata name match is only a preflight: require transaction
+resolution, then verify printer discovery/setup and scanning on hardware
+before claiming the cluster works. Keep #390 open until the remaining work
+is covered.
+
 ## Supply-chain download verification
 
 Every executable release asset fetched during image or ISO composition is
@@ -168,7 +190,7 @@ default branch, preventing unrelated upstream changes from breaking Utah's CI.
 Update it whenever synchronizing `packages/bluefin.toml` with upstream.
 
 Current counts, per the README "Package parity" section: 57 Bluefin contract
-packages installed, 85 Utah additions (GNOME 51, base-image parity, device
+packages installed, 86 Utah additions (GNOME 51, base-image parity, device
 firmware, desktop services), 10 genuinely unavailable. `scripts/check-doc-counts.py` (part of
 `just check`) recomputes these from the manifests and fails if either
 document drifts from `site/data/packages.json`.
