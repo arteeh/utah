@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-27",
+  "generated_at": "2026-09-30",
   "generator": "scripts/generate-site-data.py",
   "groups": [
     {
@@ -127,7 +127,11 @@
         "google-noto-sans-mono-vf-fonts",
         "google-noto-sans-symbols-2-fonts",
         "google-noto-serif-vf-fonts",
+        "gstreamer1-plugins-bad-free",
         "hostname",
+        "intel-gmmlib",
+        "intel-mediasdk",
+        "intel-vpl-gpu-rt",
         "iptables-nft",
         "iw",
         "keyutils",
@@ -136,6 +140,8 @@
         "langpacks-fonts-en",
         "less",
         "libimobiledevice-utils",
+        "libva-intel-media-driver",
+        "libvpl",
         "lm_sensors",
         "man-db",
         "pciutils",
@@ -147,6 +153,7 @@
         "samba-client",
         "samba-common-tools",
         "systemd-container",
+        "totem-pl-parser",
         "unzip",
         "vim-enhanced",
         "which",
@@ -199,7 +206,7 @@
     }
   ],
   "totals": {
-    "installed": 142,
+    "installed": 149,
     "unavailable": 10
   },
   "unavailable": [

@@ -63,23 +63,41 @@ policy for changing them.
 a dumping ground for packages that are merely inconvenient (header comment,
 `packages/utah.toml`).
 
-## multimedia_overrides are not missing packages
+## Media packages and codec parity
 
-Bluefin's `[multimedia_overrides]` (twelve names: mesa-libGL,
-mesa-vulkan-drivers, libva, intel-mediasdk, libheif and friends) are **not**
-extra packages. They are the same names Fedora already ships, which Bluefin
-*replaces* with negativo17 builds by enabling `fedora-multimedia`. Utah does
-not enable that repository, so it installs Fedora's builds instead. Nothing
-is absent from the image; what differs is which build it carries, and the
-practical consequence is hardware-accelerated codec support.
+Bluefin's `[multimedia_overrides]` selects replacement builds from negativo17;
+Utah does not enable that repository or consume that section wholesale.
+Do not infer that Hummingbird installs a name just because it appears there.
+The Intel VA-API driver (`libva-intel-media-driver`, providing
+`iHD_drv_video.so`) and `intel-gmmlib` must be requested in Utah's `[parity]`
+section. It also requests `intel-mediasdk`, `intel-vpl-gpu-rt`, and `libvpl`
+for the two Intel runtime generations, plus `gstreamer1-plugins-bad-free` and
+`totem-pl-parser` for media helpers and playlist parsing (#383).
 
-That is why they are absent from the contract rather than listed under
-`[unavailable]`: recording them as missing would be wrong (a source does
-provide the name), and recording them as satisfied would hide a real
-functional difference. The factory already builds several of them in
-projectbluefin/hummingbird-github; when that overlay is published and enabled
-here, these can move into the contract as a version assertion rather than a
-name one (header comment, `packages/utah.toml`).
+All seven names are published in the pinned factory image
+`sha256:0f04cff2dd0b085604ff3cd79d538ab14b97cbe356980f7d365a35dfc70c857b`.
+Inspect that image's verified leading metadata layer with
+`scripts/check-repo-availability.py`'s `repository_metadata()` when checking
+publication; spec directories or a newer Pages repository are not evidence
+about the pin. Then run `just check-repos` to validate the full transaction.
+
+Package installation does not prove codec functionality. On Intel hardware,
+run `vainfo` against the render device and confirm the iHD driver loads and
+advertises the expected decode profiles. Inspect `avdec_h264`, `openh264dec`,
+and `vah264dec` with `gst-inspect-1.0`, then test playback with a known H.264
+sample. The pinned factory publishes `gstreamer1-plugin-openh264` but only
+`noopenh264`, so resolving the plugin's library dependency is not proof of a
+working decoder. Do not add it as an H.264 fix without a working codec provider.
+
+Remaining #383 gaps: `gstreamer1-plugin-libav`,
+`gstreamer1-plugins-ugly-free`, `gstreamer1-plugin-dav1d`,
+`papers-thumbnailer`, `gnome-epub-thumbnailer`, `ffmpegthumbnailer`, and
+`gst-thumbnailers` are absent from this pinned factory metadata. Consume them
+only after their factory builds and dependency closures are published and
+resolve against Utah's pinned inputs. `totem-pl-parser` is a playlist parser,
+not a replacement for those thumbnailers. Full FFmpeg versus `ffmpeg-free`
+remains a maintainer policy decision in #383; this manifest addition makes no
+claim of full codec parity and does not change that policy.
 
 ## Repository policy
 
@@ -168,7 +186,7 @@ default branch, preventing unrelated upstream changes from breaking Utah's CI.
 Update it whenever synchronizing `packages/bluefin.toml` with upstream.
 
 Current counts, per the README "Package parity" section: 57 Bluefin contract
-packages installed, 85 Utah additions (GNOME 51, base-image parity, device
+packages installed, 92 Utah additions (GNOME 51, base-image parity, device
 firmware, desktop services), 10 genuinely unavailable. `scripts/check-doc-counts.py` (part of
 `just check`) recomputes these from the manifests and fails if either
 document drifts from `site/data/packages.json`.
