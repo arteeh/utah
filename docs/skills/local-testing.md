@@ -272,6 +272,15 @@ unprivileged test user.
 Read the recipe and script prerequisites before running it: it creates test
 accounts and requires local QEMU/KVM access, not a production installation.
 
+The installed-boot gate also checks `/var/lib/logrotate` before starting
+`logrotate.service`, then requires a nonempty `logrotate.status` state file.
+Do not create the directory in the test: `scripts/clean-stage.sh` removes
+`/var/lib` during composition, so writable service state must be recreated at
+boot by a rule shipped under `system_files/shared/usr/lib/tmpfiles.d/`.
+`utah-logrotate.conf` supplies the root-owned directory for logrotate (#386).
+A build-time `mkdir` or a clean bootc lint result alone does not prove that
+service state exists on a fresh installed system.
+
 Passing runs refresh `docs/verification/README.md`, its screenshots, and the
 delimited verification block in the root README. These are historical local
 test records, not proof that the current commit passed CI. The harness gates
