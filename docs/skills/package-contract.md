@@ -87,19 +87,20 @@ Do not infer that Hummingbird installs a name just because it appears there.
 The Intel VA-API driver (`libva-intel-media-driver`, providing
 `iHD_drv_video.so`) and `intel-gmmlib` must be requested in Utah's `[parity]`.
 It also requests `intel-mediasdk`, `intel-vpl-gpu-rt`, and `libvpl` for the two
-Intel runtime generations, plus `gstreamer1-plugins-bad-free` and
-`totem-pl-parser` for media helpers and playlist parsing (#383).
+Intel runtime generations (#383). The approved scope lands these five Intel
+names, not all seven originally proposed by #397.
 
-All seven names were published at #383's audit, but publication is not
-dependency closure. The review of #397 found that bad-free needs
+`gstreamer1-plugins-bad-free` and `totem-pl-parser` are published package
+names but are omitted from the install request because their dependency
+closures do not resolve. The full transaction failed against both the
+committed factory pin and the newer `5577d71e` candidate: bad-free needs
 `libSoundTouch.so.2`, `libfaad.so.2`, `libopenal.so.1`, and `libsrtp2.so.1`,
-and Totem needs `libuchardet.so.0`; neither enabled repository provided those
-libraries. Factory builds of `soundtouch`, `faad2`, `openal-soft`, `libsrtp`,
-and `uchardet`, followed by a reviewed pin update, are prerequisites until
-the full transaction proves otherwise. Do not classify these resolver
-failures as flaky or claim these additions are installed before the gate
-passes. Inspect the digest-verified leading metadata layer for publication,
-then require `just check-repos` against the current pinned inputs.
+and Totem needs `libuchardet.so.0`. Factory builds of `soundtouch`, `faad2`,
+`openal-soft`, `libsrtp`, and `uchardet` are prerequisites, tracked by #383.
+These are not absent package names or flaky repository failures; do not add
+them to `[unavailable]` or count them as installed. The pin stays unchanged.
+After closure publication, require `just check-repos` against the reviewed
+pinned inputs before restoring either request.
 
 Package installation does not prove codec functionality. On Intel hardware,
 run `vainfo` against the render device and confirm the iHD driver loads and
@@ -221,7 +222,7 @@ default branch, preventing unrelated upstream changes from breaking Utah's CI.
 Update it whenever synchronizing `packages/bluefin.toml` with upstream.
 
 Current counts, per the README "Package parity" section: 61 Bluefin contract
-packages installed, 95 Utah additions (GNOME 51, base-image parity, device
+packages installed, 93 Utah additions (GNOME 51, base-image parity, device
 firmware, desktop services), 7 genuinely unavailable. `scripts/check-doc-counts.py` (part of
 `just check`) recomputes these from the manifests and fails if either
 document drifts from `site/data/packages.json`.

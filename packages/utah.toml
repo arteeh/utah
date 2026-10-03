@@ -126,11 +126,8 @@ packages = [
     "intel-mediasdk",
     "intel-vpl-gpu-rt",
     "libvpl",
-    # Published names, but missing dependency closures block resolution:
-    # bad-free needs SoundTouch/faad/openal/srtp2; Totem needs uchardet.
-    # Keep the full transaction gate; publication alone is not installation.
-    "gstreamer1-plugins-bad-free",
-    "totem-pl-parser",
+    # GStreamer bad-free and Totem remain omitted pending their dependency
+    # closures (SoundTouch/faad/openal/srtp2 and uchardet); tracked by #383.
     # Locale and fonts
     "langpacks-en",
     "langpacks-fonts-en",
