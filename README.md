@@ -144,11 +144,15 @@ This is the honest list, and it is why the label above says pre-alpha.
   compiles for the base kernel. The module against the OGC kernel, the driver
   installer flags, and the flavored builds pulling the kernel cache image have
   not yet all passed in one run.
-- **Codec support differs.** Twelve `[multimedia_overrides]` names are packages
-  Fedora already ships and Bluefin *replaces* with negativo17 builds. Utah
-  installs Fedora's. Nothing is absent from the image; hardware-accelerated
-  codecs are what differ. `utah-packages` already builds several of them, so
-  this closes when Utah consumes that overlay.
+- **Codec support differs.** `[multimedia_overrides]` names are packages Fedora
+  already ships and Bluefin *replaces* with negativo17 builds. Utah now
+  requests the five Intel media runtimes (`intel-gmmlib`,
+  `libva-intel-media-driver`, `intel-mediasdk`, `intel-vpl-gpu-rt`, `libvpl`)
+  from the factory overlay; the remaining seven — `libheif`, `libva` and the
+  `mesa-*` names — are still Fedora's builds. Nothing is absent from the image;
+  hardware-accelerated codecs are what differ, and no run has yet proven
+  decode on hardware. Tracked by
+  [#383](https://github.com/projectbluefin/utah/issues/383).
 - **The image is still pre-alpha.** The digest-pinned `utah-packages` OCI
   repository is consumed and the local QEMU image reaches GDM and GNOME Shell.
 - **CUDA is deliberately excluded** — 7.68 GB installed. Use the NVIDIA
