@@ -2,6 +2,10 @@
 # Keep these in /usr/lib so bootc's first-boot preset application sees them.
 enable gdm.service
 enable bluetooth.service
+# Match Bluefin discovery and hybrid-GPU defaults.
+enable avahi-daemon.service
+enable avahi-daemon.socket
+enable switcheroo-control.service
 enable firewalld.service
 enable fwupd.service
 enable fwupd-refresh.timer

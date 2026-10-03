@@ -67,6 +67,7 @@ The TOML's sections are the contract's table of contents:
   `99-flatpaks.sh` privileged-setup hook, and the system-flatpaks Brewfile
   whose app list the contract enumerates.
 - **`[services]`** — systemd units the preset must enable: `gdm.service`,
+  `avahi-daemon.service`, `avahi-daemon.socket`, `switcheroo-control.service`,
   `bluetooth.service`, `ublue-system-setup.service`, `flatpak-preinstall.service`,
   `flatpak-nuke-fedora.service`, `brew-setup.service`, `dconf-update.service`,
   `bootc-unified-storage.service`, `uupd.timer`. Update policy delegates
@@ -232,6 +233,21 @@ Hummingbird's base does not include `systemd-resolved` by default; it is listed
 under `[services]` in `packages/utah.toml` and configured in
 `scripts/configure-services.sh`, which also disables `PrivateTmp` on
 `systemd-resolved.service` for bootc early-boot DNS resolution.
+
+### Discovery and hybrid-GPU services (#387)
+
+Keep build-time enablement in `scripts/configure-services.sh` aligned with
+`85-utah-desktop.preset`: the script configures the image and the preset
+preserves the policy when first-boot presets are applied. Bluefin's
+`enable avahi-daemon.*` covers both the service and socket for mDNS discovery;
+list both explicitly in the script and preset. `switcheroo-control.service`
+supports launching applications on a discrete GPU. `switcheroo-control` is
+already in the copied Bluefin package contract; Avahi's client libraries
+are not the daemon, so `[services]` in `packages/utah.toml` explicitly
+requests `avahi` (#104). Require the full pinned-repository transaction to
+resolve before building. The desktop contract checks all three units with
+`systemctl is-enabled` in the composed image; discovery and discrete-GPU
+launching still need runtime verification on the relevant network/hardware.
 
 ### The serial getty is masked (#103)
 

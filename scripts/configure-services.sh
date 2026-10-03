@@ -65,6 +65,10 @@ enable_unit flatpak-preinstall.service
 # bluez installed. Enable it next to the other desktop units; see #98.
 enable_unit gdm.service
 enable_unit bluetooth.service
+# Bluefin defaults for mDNS discovery and hybrid-GPU application launching.
+enable_unit avahi-daemon.service
+enable_unit avahi-daemon.socket
+enable_unit switcheroo-control.service
 enable_unit firewalld.service
 enable_unit fwupd.service
 enable_unit fwupd-refresh.timer

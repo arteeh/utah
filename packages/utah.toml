@@ -278,6 +278,9 @@ packages = [
 # Bluefin's desktop image adds these to the server base before 40-services.sh
 # enables their units. uupd is downloaded separately because it is published
 # as a release binary rather than an RPM in the Hummingbird repositories.
+# Avahi's client libraries do not install the daemon. The explicit avahi
+# request supplies avahi-daemon.service/socket enabled by the desktop policy
+# (#104, #387); switcheroo-control is already in the Bluefin contract.
 #
 # systemd-resolved and flatpak are not in the Bluefin contract because Fedora's
 # base image already carries them. Hummingbird's bootable base does not.
@@ -321,6 +324,7 @@ packages = [
 # systemd-oomd's pressure-based kills. Revisit it as its own change against
 # #384's OOM question rather than assuming the omission was an oversight.
 packages = [
+    "avahi",
     "cryptsetup",
     "flatpak",
     "fwupd",

@@ -181,6 +181,7 @@
       "blurb": "Units Bluefin adds on top of the server base; the preset cannot enable what was never installed.",
       "id": "services",
       "packages": [
+        "avahi",
         "cryptsetup",
         "flatpak",
         "fwupd",
@@ -208,7 +209,7 @@
     }
   ],
   "totals": {
-    "installed": 151,
+    "installed": 152,
     "unavailable": 7
   },
   "unavailable": [
