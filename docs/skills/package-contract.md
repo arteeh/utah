@@ -86,9 +86,12 @@ Utah does not enable that repository or consume that section wholesale.
 Do not infer that Hummingbird installs a name just because it appears there.
 The Intel VA-API driver (`libva-intel-media-driver`, providing
 `iHD_drv_video.so`) and `intel-gmmlib` must be requested in Utah's `[parity]`.
-It also requests `intel-mediasdk`, `intel-vpl-gpu-rt`, and `libvpl` for the two
-Intel runtime generations (#383). Those five Intel names are the whole media
-request; nothing else from `[multimedia_overrides]` is in scope.
+It also requests `intel-mediasdk` and `intel-vpl-gpu-rt` for the two Intel
+runtime generations (#383). Those four are the only `[multimedia_overrides]`
+names Utah requests; the other eight (`libheif`, `libva`, and the six `mesa-*`
+names) are out of scope. Utah also requests `libvpl`, which is not an overrides
+name but a dependency of `intel-vpl-gpu-rt`, so the media request is five
+packages in total.
 
 `gstreamer1-plugins-bad-free` and `totem-pl-parser` are published package
 names but are omitted from the install request because their dependency

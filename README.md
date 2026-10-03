@@ -146,10 +146,11 @@ This is the honest list, and it is why the label above says pre-alpha.
   not yet all passed in one run.
 - **Codec support differs.** `[multimedia_overrides]` names are packages Fedora
   already ships and Bluefin *replaces* with negativo17 builds. Utah now
-  requests the five Intel media runtimes (`intel-gmmlib`,
-  `libva-intel-media-driver`, `intel-mediasdk`, `intel-vpl-gpu-rt`, `libvpl`)
-  from the factory overlay; the remaining seven — `libheif`, `libva` and the
-  `mesa-*` names — are still Fedora's builds. Nothing is absent from the image;
+  requests four of those twelve names (`intel-gmmlib`,
+  `libva-intel-media-driver`, `intel-mediasdk`, `intel-vpl-gpu-rt`) from the
+  factory overlay, plus `libvpl`, which is not an overrides name but a
+  dependency of `intel-vpl-gpu-rt`; the remaining eight — `libheif`, `libva`
+  and the six `mesa-*` names — are still Fedora's builds. Nothing is absent from the image;
   hardware-accelerated codecs are what differ, and no run has yet proven
   decode on hardware. Tracked by
   [#383](https://github.com/projectbluefin/utah/issues/383).
