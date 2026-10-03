@@ -87,13 +87,12 @@ Do not infer that Hummingbird installs a name just because it appears there.
 The Intel VA-API driver (`libva-intel-media-driver`, providing
 `iHD_drv_video.so`) and `intel-gmmlib` must be requested in Utah's `[parity]`.
 It also requests `intel-mediasdk`, `intel-vpl-gpu-rt`, and `libvpl` for the two
-Intel runtime generations (#383). The approved scope lands these five Intel
-names, not all seven originally proposed by #397.
+Intel runtime generations (#383). Those five Intel names are the whole media
+request; nothing else from `[multimedia_overrides]` is in scope.
 
 `gstreamer1-plugins-bad-free` and `totem-pl-parser` are published package
 names but are omitted from the install request because their dependency
-closures do not resolve. The full transaction failed against both the
-committed factory pin and the newer `5577d71e` candidate: bad-free needs
+closures are unsatisfied in the pinned factory inputs: bad-free needs
 `libSoundTouch.so.2`, `libfaad.so.2`, `libopenal.so.1`, and `libsrtp2.so.1`,
 and Totem needs `libuchardet.so.0`. Factory builds of `soundtouch`, `faad2`,
 `openal-soft`, `libsrtp`, and `uchardet` are prerequisites, tracked by #383.
