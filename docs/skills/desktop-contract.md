@@ -308,9 +308,12 @@ or a CI artifact can be checked after the fact (recipe comment, `Justfile`,
   The extension verifier runs earlier in the same step.
 - **On demand** — `just check-desktop-contract <ref>` (default
   `localhost/utah:testing`) podman-runs both verifiers inside an
-  already-composed image: the desktop verifier and the contract are
-  bind-mounted from the working tree, the extension verifier runs from the
-  image's own `/usr/local/libexec`.
+  already-composed image: both verifiers and the desktop contract are
+  bind-mounted read-only from the working tree under `/tmp`. The extension
+  verifier uses installed mode to check the image's bundled extensions.
+  Build-time helpers under `/usr/local/libexec` are unavailable after
+  `clean-stage.sh` removes `/var/usrlocal` (the target of `/usr/local`), so
+  on-demand checks must not depend on those helpers surviving cleanup.
 - **Off-image** — `verify-desktop-contract.py --check` validates the contract
   TOML itself in source-only CI and is part of `just check`; it asserts
   nothing about any image.
