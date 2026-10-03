@@ -168,6 +168,8 @@ packages = [
     "cups",
     "cups-client",
     "cups-ipptool",
+    # Bluetooth printer backend, published by the pinned factory (#390).
+    "bluez-cups",
     "fprintd",
     "fprintd-pam",
     "poppler-utils",

@@ -112,6 +112,7 @@
         "attr",
         "bash-completion",
         "bind-utils",
+        "bluez-cups",
         "buildah",
         "bzip2",
         "crypto-policies-scripts",
@@ -206,7 +207,7 @@
     }
   ],
   "totals": {
-    "installed": 149,
+    "installed": 150,
     "unavailable": 7
   },
   "unavailable": [

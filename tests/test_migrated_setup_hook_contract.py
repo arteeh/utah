@@ -125,7 +125,8 @@ class HookEnvironment:
                               capture_output=True, text=True)
 
     def assert_stamped(self, case):
-        case.assertEqual(self.stamp.read_text().strip(), f"{HOOKS[self.kind][1]}|1")
+        version = 2 if self.kind == "flatpaks" else 1
+        case.assertEqual(self.stamp.read_text().strip(), f"{HOOKS[self.kind][1]}|{version}")
 
     def assert_effect(self, case):
         expected = {
@@ -179,6 +180,23 @@ class MigratedSetupHookContractTests(unittest.TestCase):
                 self.assertEqual(recovered.returncode, 0, recovered.stderr)
                 env.assert_stamped(self)
                 env.assert_effect(self)
+
+    def test_flatpaks_version_one_stamp_reruns_stale_preference_cleanup(self):
+        for legacy in (False, True):
+            with self.subTest(legacy=legacy):
+                env = HookEnvironment(self, "flatpaks", legacy=legacy)
+                env.stamp.write_text("flatpaks|1\n")
+                env.preferences.mkdir(parents=True)
+                stale = env.preferences / "old-bluefin-default.js"
+                stale.write_text("retired preference\n")
+                custom = env.preferences / "user-custom.js"
+                custom.write_text("user preference\n")
+                result = env.run()
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertFalse(stale.exists())
+                self.assertEqual(custom.read_text(), "user preference\n")
+                env.assert_effect(self)
+                env.assert_stamped(self)
 
     def test_framework_deliberate_skips_commit_without_running_a_body(self):
         for kind, reason in (("ucsi", "vendor"), ("ucsi", "product"),

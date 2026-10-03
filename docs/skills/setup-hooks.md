@@ -99,7 +99,7 @@ use.
 | `10-tailscale.sh` | Set a non-root pkexec caller as the Tailscale operator. Missing Tailscale or an invalid/root caller defers without stamping; a failed grant retries with the read-only API. |
 | `11-framework-ucsi-workaround.sh` | Append the `usbcore.autosuspend=-1` karg on Intel-Core-Ultra Frameworks. Wrong hardware or an already-applied karg commits a deliberate skip; missing DMI or rpm-ostree retries. |
 | `20-home-labels.sh` | Relabel `/var/home` once on systems installed before #261, repairing a mis-keyed active `file_contexts.homedirs` first (#474). |
-| `99-flatpaks.sh` | Copy optional Firefox defaults at first boot, committing after a successful copy or deliberate absence/architecture skip. A failed copy does not commit with the read-only API. |
+| `99-flatpaks.sh` | Remove stale Bluefin Firefox preferences and copy optional defaults. Version 2 reruns machines that stamped version 1 while the quoted removal glob was a no-op (#489). Successful copies and deliberate absence/architecture skips commit; body failures retry with the read-only API. |
 
 `05-bootupctl-adopt.sh` is the canonical example of a transient-skip body:
 each guard (`command -v bootupctl`, the live-session check) exits without
@@ -125,7 +125,10 @@ transitions (fresh install, re-run after commit, live session, missing
 fresh, migrate, already-symlinked and reverse-symlink (`~/.config/ghostty`
 pointing into the per-app dir) transitions, plus the two user-managed layouts
 the hook must not disturb: the per-app path symlinked at a dotfiles directory,
-and both paths symlinked at one. Run the suite with `just test`.
+and both paths symlinked at one. `tests/test_flatpaks_hook.py` executes real
+preference cleanup and copying in scratch roots; the migrated-hook suite also
+starts from a version-1 stamp and proves stale defaults are removed, user
+preferences survive, and version 2 commits. Run the suite with `just test`.
 `just check` syntax-checks every hook (`bash -n`) through
 `scripts/check-script-syntax.py`; there is no shellcheck gate in the Justfile
 or CI.

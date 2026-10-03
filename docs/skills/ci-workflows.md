@@ -75,7 +75,17 @@ the build before expensive compilation or container builds run:
   run is one command) or within the ten lines that follow it, must be code
   rather than comment text, and a bare `--check` never clears on its own --
   `sha256sum --check` clears through `sha256sum`. Flathub descriptor
-  downloads (`flathub.flatpakrepo`, `appstream`) and comment lines are exempt.
+  downloads (`flathub.flatpakrepo`, `appstream`) and comment lines are exempt
+  from the extension heuristic only; `scripts/configure-services.sh` still
+  pins `flathub.flatpakrepo` by sha256, because the descriptor carries the
+  `Url=` and `GPGKey=` every Flatpak on the image is verified against.
+  Verify the trust behavior by running `configure-services.sh` in a disposable
+  image: a matching descriptor must install unchanged, while a hash mismatch
+  must exit nonzero without replacing an existing remote. Source ordering or
+  string assertions do not prove that rejection path.
+  `tests/test_flathub_descriptor.py` runs the whole script against scratch
+  filesystem roots and a committed descriptor fixture, with real hashing and
+  installation. It covers matching bytes and rejection without remote replacement.
   Scanning is per *logical* line: backslash continuations are joined before
   matching, so a `curl` whose URL sits on a continuation line is still inspected
   and is reported at the line the command starts on. Matching raw lines instead
