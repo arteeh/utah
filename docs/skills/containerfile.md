@@ -60,6 +60,15 @@ In summary:
   rebuilt nothing and shipped the previous factory's packages (#371). The
   stamp rides a COPY before the transaction, and COPY content always keys the
   cache. A test fails the build when the two disagree.
+- Renovate's built-in Dockerfile extraction skips the composed package ARG.
+  The repository's regex manager instead discovers the digest directly in
+  `PACKAGE_IMAGE_SHA` and in the `.repo` stamp, with both occurrences grouped
+  as `ghcr.io/projectbluefin/utah-packages:latest`. This retains the local
+  `PACKAGE_IMAGE_REF` override and the digest-only OCI factory label.
+  Renovate 44.132.2 extraction and real replacement were exercised against
+  both files: they change to one digest while preserving unrelated content.
+  The duplicate scheduled updater is retired; the grouped PR must still
+  pass the package transaction and cache-stamp equality checks.
 - External executable release assets (such as `uupd`) are pinned by version
   and verified with explicit sha256 checksums (`UUPD_SHA256`) before
   extraction.

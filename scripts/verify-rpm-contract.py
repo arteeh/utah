@@ -619,7 +619,7 @@ def resolve_build_timestamp(environ: dict[str, str] | None = None) -> tuple[str 
 def read_factory_pin(repo_file: Path = Path(FACTORY_REPO_PATH)) -> str | None:
     """The package factory digest stamped into the pinned repository file.
 
-    `scripts/bump-factory-pin.py` moves this stamp together with the
+    Renovate's grouped factory-pin update moves this stamp together with the
     Containerfile's `ARG PACKAGE_IMAGE_SHA`, so it names the exact factory image
     the contract's NEVRAs were installed from.
     """
