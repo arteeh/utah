@@ -117,16 +117,16 @@ contract. A fresh temporary registry prevents cached plugin metadata from
 hiding a broken load. Missing tools, missing elements, load failures and
 probe timeouts fail the build. Off-image `--check` does not run these probes.
 
-On Intel hardware, run `vainfo` against the render device and confirm the
-driver loads and advertises the expected decode profiles, then decode a known
-H.264 sample. iHD does not cover older Intel generations; package presence
-alone cannot prove hardware support. The audit pin published
-`gstreamer1-plugin-openh264` but only `noopenh264`; resolving that library
-dependency is not proof of a working decoder.
+On Intel hardware, run `vainfo` against the render device to confirm the driver
+loads and advertises the expected decode profiles, then decode a known H.264
+sample. iHD does not cover older Intel generations; package presence alone
+cannot prove hardware support. The audit pin published `gstreamer1-plugin-openh264`
+but only `noopenh264`; resolving that library is not proof of a working decoder.
 
-Keep #12 and #383 open for the remaining factory closure, full FFmpeg and
-runtime playback/hardware proof. Full FFmpeg (not `-free`) is the decided
-direction. `gst-thumbnailers` still needs the Rust crate stack (factory #527).
+Keep #12 and #383 open for factory closure, full FFmpeg (not `-free`) and runtime
+playback/hardware proof. `gst-thumbnailers` needs the Rust crate stack (factory #527).
+For partial work, use `Refs #12` / `Refs #383` in PR descriptions and commits;
+reserve closing keywords for work meeting all remaining acceptance criteria.
 
 ## Repository policy
 
