@@ -1,14 +1,14 @@
-ARG BASE_IMAGE=quay.io/hummingbird-community/os-minimal:latest@sha256:1b537869843c305f5db664ff7e59c13fe2c3312c66359a195a0b23d74e601db7
+ARG BASE_IMAGE=quay.io/hummingbird-community/os-minimal:latest@sha256:7a1982b85b89164796ee938c00fd6d892e605bddde56811ceba7b83f0d21e43f
 # The package factory publishes a complete, digest-addressable RPM repository.
 # Keep this pin in Utah so an image build is reproducible and can be reviewed
 # against the exact package set it consumes.
 ARG PACKAGE_IMAGE=ghcr.io/projectbluefin/utah-packages
-ARG PACKAGE_IMAGE_SHA=sha256:1fa7c4346b285c55deea67a89c0101e7624f987baec9cebf156dd4c2f5e956aa
+ARG PACKAGE_IMAGE_SHA=sha256:710195827218db354cd1d0033d68db8b96efec97f1aaf3f45f8973479c6e7215
 # CI keeps PACKAGE_IMAGE_SHA pinned. PACKAGE_IMAGE_REF supports a local image
 # in containers-storage, where no registry digest is available.
 ARG PACKAGE_IMAGE_REF=${PACKAGE_IMAGE}@${PACKAGE_IMAGE_SHA}
 ARG COMMON_IMAGE=ghcr.io/projectbluefin/common
-ARG COMMON_IMAGE_SHA=sha256:73b8cde850d707964a6db95de30a97c9513054c478631b4fb73ffcd6860fcdf8
+ARG COMMON_IMAGE_SHA=sha256:d2b9c6ac5e5adf9ff8054a68a0df48a4ba2513d58ad94079b2c877a114c1ebf4
 ARG BREW_IMAGE=ghcr.io/ublue-os/brew
 ARG BREW_IMAGE_SHA=sha256:c201bc801e4828849e8e36c4adcb5c0f38d35ac3ff9546a0ecab0fd2beabf51f
 # Bluefin wallpapers, taken straight from the artwork repository's own image
@@ -71,6 +71,11 @@ RUN set -eu; \
 
 # Stage source origins without committing their COPY mtimes to the runtime image.
 FROM scratch AS inputs
+COPY docs/agent /usr/share/utah/agent
+COPY Containerfile /usr/share/utah/agent/build-source.Containerfile
+COPY .gitmodules /usr/share/utah/agent/gitmodules
+COPY config/flavors.json /usr/share/utah/agent/flavors.json
+COPY scripts/build-gnome-extensions.sh /usr/share/utah/agent/build-gnome-extensions.sh.txt
 COPY packages/bluefin.toml packages/utah.toml contracts/bluefin-desktop.toml /usr/share/utah/
 COPY packages/hummingbird.repo packages/nvidia-container.repo packages/utah-packages.repo /etc/yum.repos.d/
 COPY packages/RPM-GPG-KEY-redhat-release-2 /etc/pki/rpm-gpg/
@@ -292,6 +297,14 @@ RUN --mount=type=bind,from=packages,source=/repository,target=/etc/utah-packages
 # the global pin's value: a global ARG is only in scope for FROM lines, and
 # without this the label baked empty (#371 follow-up).
 ARG PACKAGE_IMAGE_SHA
+ARG BASE_IMAGE
+ARG PACKAGE_IMAGE_REF
+ARG COMMON_IMAGE
+ARG COMMON_IMAGE_SHA
+ARG BREW_IMAGE
+ARG BREW_IMAGE_SHA
+ARG WALLPAPERS_IMAGE
+ARG WALLPAPERS_IMAGE_SHA
 ARG IMAGE_NAME=utah
 # Canonical OS identity, distinct from the repository name a flavor publishes
 # under. Always utah; never flavored.
@@ -300,6 +313,8 @@ ARG IMAGE_FLAVOR=main
 ARG IMAGE_VENDOR=projectbluefin
 ARG VERSION=testing
 ARG SHA_HEAD_SHORT=unknown
+ARG SHA_HEAD
+ARG GNOME_EXTENSION_PROVENANCE
 # Production images keep SSH closed; local VM diagnostics can opt in with
 # ENABLE_SSHD=1, following tunaOS's debug-image convention.
 ARG ENABLE_SSHD=0
@@ -344,7 +359,7 @@ RUN --mount=type=bind,from=common,source=/system_files/bluefin/usr/share/pixmaps
     echo "${UUPD_SERVICE_SHA256}  /tmp/uupd/uupd.service" | sha256sum --check --strict && \
     echo "${UUPD_TIMER_SHA256}  /tmp/uupd/uupd.timer" | sha256sum --check --strict && \
     /usr/local/libexec/utah-build-gnome-extensions && \
-    /usr/local/libexec/utah-verify-gnome-extensions && \
+    /usr/local/libexec/utah-verify-gnome-extensions --record-provenance && \
     glib-compile-schemas /usr/share/glib-2.0/schemas && \
     ENABLE_SSHD="${ENABLE_SSHD}" /usr/local/libexec/utah-configure-services && \
     /usr/local/libexec/utah-configure-branding && \

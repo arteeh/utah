@@ -15,12 +15,12 @@ description: >-
   The runtime desktop contract in contracts/bluefin-desktop.toml and its
   in-image verifiers. Use when changing branding, os-release, service
   presets, GNOME extensions, or first-boot Flatpak behavior.
+on_device: docs/agent/skills/desktop-contract.md
 metadata:
   type: policy
 ---
 
 # Desktop Contract
-
 `contracts/bluefin-desktop.toml` is the runtime contract for Utah's
 Bluefin-derived desktop experience on top of Hummingbird. It is intentionally
 separate from `packages/bluefin.toml`: package parity proves RPMs; this file
@@ -87,10 +87,10 @@ The TOML's sections are the contract's table of contents:
   Switchers can also manually verify or mask them if a local `/etc` symlink was preserved.
 
   The last two units are Dakota parity (#675): install-date stamping and the
-  booted-image snapshot fastfetch reads. `configure-services.sh` enables them
-  and patches Common's fastfetch ([stats](desktop-contract/references/stats-refresh.md)),
-  image-info and `uwelcome.sh`; non-interactive shells skip the greeting. Wallpaper rotation is
-  deliberately NOT Dakota parity: Common's per-user `bluefin-dynamic-wallpaper`
+  booted-image snapshot Common's `/usr/libexec/ublue-booted-image` falls back to.
+  `configure-services.sh` enables them, patches Common's fastfetch ([stats](desktop-contract/references/stats-refresh.md))
+  and `uwelcome.sh` (non-interactive shells skip the greeting), and checks image-info ([bootc compatibility](desktop-contract/references/image-info.md)).
+  Wallpaper rotation is deliberately NOT Dakota parity: Common's per-user `bluefin-dynamic-wallpaper`
   timer is hemisphere-aware and rotates live at month boundaries, while
   Dakota's boot-time month symlink is northern-only and stale until reboot, so
   repointing the default would stand the better rotator down (#675 decision).
@@ -261,22 +261,23 @@ full image build must verify pins before merge. Edit `.gitmodules` directly
 for source URL or tracked-branch changes; automation advances existing pins.
 Search Light was dropped: GNOME 51 removed `set_shader_source`, which its shader code calls, so it failed ISO tests.
 
-`scripts/verify-gnome-extensions.py` asserts every one declares GNOME 51 in
-its `metadata.json`. It runs in two modes from the same script:
+`scripts/verify-gnome-extensions.py` checks GNOME 51 support and provenance:
 
-- **Source mode** — `--source` checks the submodule checkouts in the working
-  tree; this is what `just check` runs.
-- **Installed mode** — the default checks `/usr/share/gnome-shell/extensions`
-  under an image root; this is what runs in the Containerfile as
-  `/usr/local/libexec/utah-verify-gnome-extensions`, right after
-  `utah-build-gnome-extensions`. It also fails on any extension file that is
-  not world-readable or is group/world-writable: release zips kept `0600`
-  metadata, so gnome-shell hit "Permission denied". The build script
-  normalizes the tree with `chmod -R u+rwX,go+rX,go-w`.
+- **Source mode** — `--source` checks the submodule metadata and indexed
+  gitlinks in the working tree; this is what `just check` runs.
+- **Installed mode** — checks `/usr/share/gnome-shell/extensions` under an image
+  root. The Containerfile runs
+  `/usr/local/libexec/utah-verify-gnome-extensions --record-provenance` after
+  `utah-build-gnome-extensions`. Files must be world-readable and not
+  group/world-writable: release zips kept `0600` metadata, so gnome-shell hit
+  "Permission denied". The build normalizes with `chmod -R u+rwX,go+rX,go-w`.
+- **Provenance** — `--print-provenance` (host, build recipes) resolves UUIDs to
+  `.gitmodules` entries and indexed gitlinks; `--source` runs the same check.
+  `--record-provenance` (image) writes `/usr/share/utah/provenance.json`.
+  See [Image provenance](containerfile.md#image-provenance).
 
-Building GSConnect runs meson install; `scripts/build-gnome-extensions.sh` disables GSConnect's
-`update_desktop_database` hook because `desktop-file-utils` is not published by Hummingbird or
-Utah's repository. MIME and schema databases are handled by the system and glib-compile-schemas.
+GSConnect's meson install skips `update_desktop_database`: Hummingbird and Utah
+lack `desktop-file-utils`. The system and glib-compile-schemas handle databases.
 
 Declaring GNOME 51 in `metadata.json` is necessary, not sufficient: both
 failures below passed the metadata check, built cleanly, and only showed up
@@ -446,19 +447,15 @@ The parity rollout (#868) added network daemons that Hummingbird's
 `99-default-disable.preset` must keep off. The `disabled` list in
 `contracts/bluefin-desktop.toml` (checked by `verify-desktop-contract.py`)
 fails the build if `dnsmasq.service`, `rpcbind.service`/`.socket`,
-`autofs.service`, `openvpn-{client,server}@.service`, `saned.socket` or
-`ipp-usb.service` is enabled; masked, static (ipp-usb is udev-started) or
-absent units count as off. Keep it in sync with `baselines/triage.toml`.
+`autofs.service`, `openvpn-{client,server}@.service`, `saned.socket`,
+`ipp-usb.service`, `httpd.service`, `httpd.socket`, `httpd@.service` or
+`htcacheclean.service` is enabled; masked, static or absent units count as
+off (Apache httpd, #948: WebDAV runs its own per-session httpd, so port 80
+stays closed). Keep it in sync with `baselines/triage.toml`.
 
 ### The fwupd-refresh unit pins a static user (#385)
 
-Hummingbird builds fwupd with `-Dsystemd_unit_user=""`, which expands the
-`@user@` template in `data/motd/fwupd-refresh.service.in` to `DynamicUser=yes`.
-Combined with the unit's `CacheDirectory=fwupdmgr`, every boot triggers
-systemd's pre-existing-public → `/var/cache/private/fwupdmgr` migration; in
-this bootc image the rename returns `EACCES` (a policy denial on `/var/cache`,
-not a plain-ownership problem), the unit exits 1, and firmware metadata never
-refreshes.
+Hummingbird builds fwupd with `-Dsystemd_unit_user=""`, which expands the `@user@` template in `data/motd/fwupd-refresh.service.in` to `DynamicUser=yes`. Combined with the unit's `CacheDirectory=fwupdmgr`, every boot triggers systemd's pre-existing-public → `/var/cache/private/fwupdmgr` migration; in this bootc image the rename returns `EACCES` (a policy denial on `/var/cache`, not a plain-ownership problem), the unit exits 1, and firmware metadata never refreshes.
 
 The fix pins the unit to a static user so the migration code never runs.
 Both halves must land together — the drop-in alone leaves the service with no
@@ -490,11 +487,8 @@ The daemon (`fwupd.service`) is unaffected: it runs as root with no
 `DynamicUser=` and uses `CacheDirectory=fwupd`, so its cache lives under
 `/var/cache/fwupd` directly with no dynamic-user migration path. Firmware
 flashing still goes through the daemon, which keeps its existing root
-lifecycle. The pairing is asserted by `FwupdRefreshDropInTests` in
-`tests/test_desktop_contract.py`.
+lifecycle. The pairing is asserted by `FwupdRefreshDropInTests` in `tests/test_desktop_contract.py`.
 
 ## Verification
 
-The source-only contract check runs in `just check`; the
-[verifier reference](desktop-contract/references/verifiers.md) describes the
-image-build and installed-image checks.
+The source-only contract check runs in `just check`; the [verifier reference](desktop-contract/references/verifiers.md) describes the image-build and installed-image checks.

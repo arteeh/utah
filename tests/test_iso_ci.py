@@ -84,7 +84,7 @@ class EvidenceTests(unittest.TestCase):
         for required in ["OVERLAY_FS", "SQUASHFS", "SQUASHFS_ZSTD", "EROFS_FS",
                          "BTRFS_FS", "BLK_DEV_LOOP", "DM_SNAPSHOT", "DM_CRYPT",
                          "CRYPTO_XTS", "FUSE_FS", "FS_VERITY", "SYSFB_SIMPLEFB",
-                         "DRM_SIMPLEDRM", "VIDEO_DEV"]:
+                         "DRM_SIMPLEDRM", "VIDEO_DEV", "DRM_AMDGPU", "DRM_XE"]:
             self.assertIn(required, names)
             self.assertRegex(script, rf"--(?:enable|module) {required}(?:\s|$)")
         self.assertEqual(script.count("verify_config /usr/lib/utah/ogc-kernel.config"), 2)
@@ -243,6 +243,8 @@ class EvidenceTests(unittest.TestCase):
         self.assertEqual(update(result, proof), result)
         self.assertIn("Keep this paragraph.", result)
         self.assertIn("actions/runs/123", result)
+        self.assertIn("may show a failure in independent tests", result)
+        self.assertIn("the LUKS and production ISO jobs passed", result)
 
     def test_production_iso_artifacts_follow_the_full_luks_matrix(self):
         import yaml

@@ -3,7 +3,7 @@
 <!-- BEGIN E2E VERIFICATION -->
 [![Verified ISO desktop](docs/verification/screenshots/installed-fastfetch.png)](docs/verification/README.md)
 
-*LUKS ISO test passed for commit `fa9cf91e98f1`. [CI run](https://github.com/projectbluefin/utah/actions/runs/40211129022); [screenshots and provenance](docs/verification/README.md).*
+*LUKS ISO test passed for commit `e76a16d463fa`. [CI run](https://github.com/projectbluefin/utah/actions/runs/40464595572) may show a failure in independent tests; the LUKS and production ISO jobs passed; [screenshots and provenance](docs/verification/README.md).*
 <!-- END E2E VERIFICATION -->
 
 †Utahraptor ostrommaysi
@@ -40,12 +40,15 @@ Utah is built across two repositories:
 
 ## Download and image streams
 
-- **Testing ISO (AMD / Intel):** [`utah-live-latest.iso`](https://projectbluefin.dev/utah-live-latest.iso) ([SHA-256 checksum](https://projectbluefin.dev/utah-live-latest.iso-CHECKSUM))
+- **Live ISO (AMD / Intel, Secure Boot off):** [`utah-live-latest.iso`](https://projectbluefin.dev/utah-live-latest.iso) ([SHA-256 checksum](https://projectbluefin.dev/utah-live-latest.iso-CHECKSUM)), built monthly from `:stable`
 - **Live versions & downloads:** [docs.projectbluefin.io/utah](https://docs.projectbluefin.io/utah)
 
-The testing ISO is hosted on projectbluefin.dev, not published by this
-repository's workflows (CI here only uploads `utah-live.iso` as a short-lived
-workflow artifact). Verify the download against its checksum before use.
+The live ISO is hosted on projectbluefin.dev and built by
+[`projectbluefin/dakota-iso`](https://github.com/projectbluefin/dakota-iso)
+(`build-iso-utah.yml`, monthly on the 8th, from `ghcr.io/projectbluefin/utah:stable`),
+not published by this repository's workflows (CI here only uploads
+`utah-live.iso` as a short-lived workflow artifact). Verify the download against
+its checksum before use.
 
 Like Bluefin, Utah builds four hardware flavors (`utah`, `utah-nvidia`,
 `utah-gaming`, `utah-nvidia-gaming`) from `config/flavors.json`:

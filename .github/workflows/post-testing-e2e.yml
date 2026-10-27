@@ -203,6 +203,9 @@ jobs:
           set -euo pipefail
           tacklebox_image=$(< config/tacklebox-image)
           [[ "$tacklebox_image" =~ ^[^[:space:]@]+@sha256:[a-f0-9]{64}$ ]] || exit 1
+          # Verify the builder image's SLSA provenance before running it
+          # privileged (utah#918).
+          sudo TACKLEBOX_IMAGE="$tacklebox_image" bash iso/scripts/verify-tacklebox-attestation.sh
           sudo podman pull "$tacklebox_image"
           sudo podman run --rm --privileged --security-opt label=disable \
             -v /dev:/dev -v "$PWD/output:/out:ro" "$tacklebox_image" \
@@ -311,7 +314,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJSON(needs.resolve.outputs.suites) }}
-    uses: projectbluefin/testsuite/.github/workflows/e2e.yml@b5ec20c584485b2c95a407fc5e8425d79ff0901f # v1
+    uses: projectbluefin/testsuite/.github/workflows/e2e.yml@19c1e22bde6f74a0f9ab3ae311c125585cd1a850 # v1
     with:
       image: ${{ fromJSON(needs.resolve.outputs.digests)[matrix.image] }}
       compose_image: false
