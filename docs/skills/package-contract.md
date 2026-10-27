@@ -107,10 +107,9 @@ The four requested overrides and `ffmpegthumbnailer` are in `[factory].parity`;
 their installed releases must carry `.bfin` to prevent base substitution.
 Check new names with `just check-repos` and the image's `package-origins.txt`.
 
-The second factory consumption wave (#871) now requests the libav H.264
-plugin, dav1d AV1 plugin, bad-free (+ libs), ugly-free, Papers thumbnailer and
-EPUB thumbnailer. These requests also appear in `[factory].parity`; do not
-reuse older issue comments that describe them as unpublished.
+The second factory consumption wave (#871) now requests the libav H.264 plugin, dav1d AV1 plugin,
+bad-free (+ libs), ugly-free, Papers thumbnailer and EPUB thumbnailer. These requests also appear
+in `[factory].parity`; do not reuse older issue comments that describe them as unpublished.
 
 The on-image RPM verifier runs `gst-inspect-1.0 avdec_h264` and
 `gst-inspect-1.0 dav1ddec` when their provider packages are in the resolved
